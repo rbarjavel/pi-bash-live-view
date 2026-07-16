@@ -37,9 +37,9 @@ export default function bashLiveView(pi: ExtensionAPI) {
     parameters: bashLiveViewParams,
     async execute(toolCallId, params, signal, onUpdate, ctx) {
       if (params.usePTY !== true) {
-        return originalBash.execute(toolCallId, params, signal, onUpdate);
+        return originalBash.execute(toolCallId, params, signal ?? new AbortController().signal, onUpdate);
       }
-      return executePtyCommand(toolCallId, params, signal, ctx);
+      return executePtyCommand(toolCallId, params, signal ?? new AbortController().signal, ctx);
     },
   });
 

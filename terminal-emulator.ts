@@ -89,7 +89,7 @@ let TerminalCtor: XtermTerminalCtor | null = null;
 
 function ensureXtermHeadlessLoaded(): XtermTerminalCtor {
   if (!globalThis.window) {
-    (globalThis as typeof globalThis & { window: object }).window = {};
+    (globalThis as { window?: unknown }).window = {};
   }
   if (!TerminalCtor) {
     ({ Terminal: TerminalCtor } = require('@xterm/headless') as { Terminal: XtermTerminalCtor });
