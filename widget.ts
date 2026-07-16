@@ -1,4 +1,5 @@
 import type { ExtensionContext } from '@earendil-works/pi-coding-agent';
+import type { Theme } from '@earendil-works/pi-coding-agent';
 import { snapshotToAnsiContentLines } from './terminal-emulator.ts';
 import type { PtyTerminalSession } from './pty-session.ts';
 
@@ -63,6 +64,7 @@ export function buildWidgetAnsiLines({
   rows,
   elapsedMs = 0,
   accentColor = DEFAULT_ACCENT_COLOR,
+  accent = `\x1b[38;2;${accentColor}m`,
 }: {
   title?: string;
   snapshot: ReturnType<PtyTerminalSession['getViewportSnapshot']>;
@@ -70,12 +72,12 @@ export function buildWidgetAnsiLines({
   rows: number;
   elapsedMs?: number;
   accentColor?: string;
+  accent?: string;
 }): string[] {
-  const accent = `\x1b[38;2;${accentColor}m`;
   const reset = '\x1b[0m';
   const innerWidth = Math.max(10, width - 2);
-  const top = `${accent}╭${buildTopBorder(title, innerWidth, elapsedMs)}╮${reset}`;
-  const bottom = `${accent}╰${'─'.repeat(innerWidth)}╯${reset}`;
+  const top = `${accent}┌${buildTopBorder(title, innerWidth, elapsedMs)}┐${reset}`;
+  const bottom = `${accent}└${'─'.repeat(innerWidth)}┘${reset}`;
   const bodySource = snapshotToAnsiContentLines(snapshot).slice(-rows);
   const body = [];
   for (let i = 0; i < rows; i += 1) {
@@ -86,7 +88,7 @@ export function buildWidgetAnsiLines({
 }
 
 function makeWidgetFactory(session: LiveSession) {
-  return (tui: any) => {
+  return (tui: any, theme: Theme) => {
     session.requestRender = () => tui.requestRender();
     return {
       invalidate() {},
@@ -96,6 +98,7 @@ function makeWidgetFactory(session: LiveSession) {
           width,
           rows: session.rows,
           elapsedMs: Date.now() - session.startedAt,
+          accent: theme.getFgAnsi('borderAccent'),
         });
       },
     };
